@@ -1,0 +1,31 @@
+# Python Dependencies
+
+# Google API Client Libraries
+google-api-python-client
+google-auth-httplib2
+google-auth-oauthlib
+
+# HTTP Requests (Might still be needed by Google libs or future additions)
+requests
+
+# HTML Parsing (for Zoom)
+beautifulsoup4
+lxml # Recommended parser for BeautifulSoup
+
+# Word Document Parsing (for OneNote export)
+python-docx
+
+# Templating
+Jinja2
+
+# Environment Variables
+python-dotenv
+
+# Timezones
+pytz
+
+# AI API
+openai
+
+# Optional: For inlining CSS in emails (if needed later)
+# pynliner 

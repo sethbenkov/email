@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Brief - {{ today_date }}</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #0056b3;
+            font-size: 24px;
+            border-bottom: 2px solid #dee2e6;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        h2 {
+            color: #17a2b8;
+            font-size: 20px;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #e9ecef;
+            padding-bottom: 5px;
+        }
+        ul, ol {
+            padding-left: 20px;
+            margin-top: 0;
+        }
+        li {
+            margin-bottom: 8px;
+        }
+        .section {
+            margin-bottom: 25px;
+        }
+        .meeting-summary {
+            margin-bottom: 15px;
+            padding-left: 15px;
+            border-left: 3px solid #6c757d;
+        }
+        .meeting-title {
+            font-weight: bold;
+            color: #495057;
+            margin-bottom: 5px;
+        }
+        .email-snippet {
+            font-size: 0.9em;
+            color: #6c757d;
+            margin-bottom: 10px;
+            padding-left: 15px;
+            border-left: 3px solid #ffc107;
+        }
+        .task-item {
+             margin-bottom: 5px;
+        }
+        .footer {
+            margin-top: 30px;
+            font-size: 0.8em;
+            color: #6c757d;
+            text-align: center;
+            border-top: 1px solid #e9ecef;
+            padding-top: 15px;
+        }
+        /* Add more specific styles as needed */
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Daily Brief - {{ today_date }}</h1>
+
+        <!-- Calendar Section -->
+        <div class="section">
+            <h2>Today's Calendar</h2>
+            {% if calendar_events %}
+                <ul>
+                {% for event in calendar_events %}
+                    <li>{{ event }}</li>
+                {% endfor %}
+                </ul>
+            {% else %}
+                <p>No meetings scheduled for today.</p>
+            {% endif %}
+        </div>
+
+        <!-- AI Summaries Placeholder -->
+        <div class="section">
+            <h2>Yesterday's Highlights (AI Summary)</h2>
+            <p><i>(AI summary of emails and meetings will appear here when integrated)</i></p>
+            <p>{{ ai_summary | replace('\n', '<br>') | safe }}</p>
+            {# Example structure for when AI returns data
+            <h3>Key Email Themes:</h3>
+            <ul>
+                <li>Theme 1...</li>
+                <li>Theme 2...</li>
+            </ul>
+            <h3>Meeting Action Items:</h3>
+            <table>
+                <thead><tr><th>Task</th><th>Owner</th><th>Due</th></tr></thead>
+                <tbody>
+                    <tr><td>...</td><td>...</td><td>...</td></tr>
+                </tbody>
+            </table>
+            #}
+        </div>
+
+        <!-- Zoom Meeting Summaries Section -->
+        <div class="section">
+            <h2>Yesterday's Meeting Details</h2>
+            {% if zoom_summaries %}
+                {% for summary in zoom_summaries %}
+                    {% if summary.title != 'No meeting summaries found for yesterday.' and summary.title != 'Error: Zoom summary folder not configured correctly.' and not summary.title.startswith('Error') %}
+                        <div class="meeting-summary">
+                            <p class="meeting-title">{{ summary.title }}</p>
+                            <p><b>Recap:</b> {{ summary.recap }}</p>
+                            <p><b>Next Steps:</b><br>{{ summary.next_steps | replace('\n', '<br>') | safe }}</p>
+                        </div>
+                    {% else %}
+                        <p>{{ summary.title }}</p>
+                    {% endif %}
+                {% endfor %}
+            {% else %}
+                <p>No meeting summaries processed.</p>
+            {% endif %}
+        </div>
+
+        <!-- Email Snippets Section -->
+        <div class="section">
+            <h2>Yesterday's Email Snippets</h2>
+            {% if email_snippets %}
+                {% for snippet in email_snippets %}
+                     {% if not snippet.startswith('Error') %}
+                        <div class="email-snippet">
+                            <p>{{ snippet }}</p>
+                        </div>
+                     {% else %}
+                         <p>{{ snippet }}</p>
+                     {% endif %}
+                {% endfor %}
+            {% else %}
+                <p>No relevant emails found.</p>
+            {% endif %}
+        </div>
+
+        <!-- OneNote Tasks Section -->
+        <div class="section">
+            <h2>Open OneNote Tasks</h2>
+            {% if onenote_tasks %}
+                <ul>
+                {% for task in onenote_tasks %}
+                    <li class="task-item">{{ task }}</li>
+                {% endfor %}
+                </ul>
+            {% else %}
+                <p>No open tasks found.</p>
+            {% endif %}
+        </div>
+
+        <div class="footer">
+            Generated on {{ today_date }} at {{ generation_time }} {{ generation_timezone }}
+        </div>
+    </div>
+</body>
+</html> 

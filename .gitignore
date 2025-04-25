@@ -1,0 +1,33 @@
+# Git ignore file
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environment
+venv/
+*/venv/
+.venv/
+*/.venv/
+ENV/
+*/ENV/
+env/
+*/env/
+
+# Sensitive Files
+credentials.json
+token.json
+*.token
+.env
+
+# IDE settings
+.vscode/
+.idea/
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Local Output Files
+daily_brief_local_output.html 

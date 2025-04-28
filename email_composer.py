@@ -5,7 +5,7 @@ from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 import config
 
-def compose_email(calendar_events, email_snippets, zoom_summaries, onenote_tasks, ai_summary="(AI Summary Placeholder)"):
+def compose_email(calendar_events, email_list, onenote_tasks, ai_summary):
     """Renders the HTML email using the Jinja2 template and collected data."""
     print("\n--- Composing Email ---")
     try:
@@ -34,10 +34,9 @@ def compose_email(calendar_events, email_snippets, zoom_summaries, onenote_tasks
             'generation_time': generation_time_str,
             'generation_timezone': generation_timezone_str,
             'calendar_events': calendar_events,
-            'email_snippets': email_snippets,
-            'zoom_summaries': zoom_summaries,
+            'email_list': email_list,
             'onenote_tasks': onenote_tasks,
-            'ai_summary': ai_summary # Placeholder for now
+            'ai_summary': ai_summary
         }
 
         # Render the template
@@ -51,13 +50,13 @@ def compose_email(calendar_events, email_snippets, zoom_summaries, onenote_tasks
         return f"<html><body><h1>Error</h1><p>Failed to compose email: {e}</p></body></html>"
 
 if __name__ == '__main__':
-    # For local testing with sample data
-    sample_events = ["09:00 AM - Team Sync", "02:30 PM - Project Review"]
-    sample_emails = ["From: Boss | Subject: Urgent Request | Snippet: Please review the attached...", "From: Newsletter | Subject: Weekly Update | Snippet: Here is your weekly news..."]
-    sample_zooms = [{'title': 'Weekly Team Meeting', 'recap': 'Discussed project progress.', 'next_steps': '- Alice to update JIRA\n- Bob to send report'}]
+    # For local testing with sample data matching new structures
+    sample_events = [{"time": "09:00 AM", "name": "Team Sync"}, {"time": "02:30 PM", "name": "Project Review"}]
+    sample_emails = [{"sender": "Boss", "subject": "Urgent Request"}, {"sender": "Newsletter", "subject": "Weekly Update"}]
     sample_tasks = ["[Project X] Finalize budget", "[Admin] Book travel"]
+    sample_ai = "**Key Decisions:**\n- Approved budget V2.\n\n**Action Items (Seth Benkov):**\n- Send final report by EOD Friday.\n\n**Action Items (Others):**\n- Kevin to update roadmap (Due Tomorrow).\n\n**Due Dates:**\n- Project X Launch: Next Monday."
 
-    html_result = compose_email(sample_events, sample_emails, sample_zooms, sample_tasks)
+    html_result = compose_email(sample_events, sample_emails, sample_tasks, sample_ai)
 
     # Save to local file for preview
     output_file = config.LOCAL_OUTPUT_HTML_FILE

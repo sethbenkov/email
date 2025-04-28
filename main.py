@@ -9,7 +9,6 @@ from openai import OpenAI, OpenAIError
 # Import fetcher and composer functions
 import google_calendar_fetcher
 import gmail_fetcher
-import zoom_parser
 import onenote_parser
 import email_composer
 import config
@@ -31,16 +30,26 @@ def get_ai_summary(text_to_summarize):
     client = OpenAI(api_key=api_key)
 
     # Prepare chat messages
+    system_message = ("You are a highly efficient executive assistant. Your task is to analyze the provided text, which includes emails, meeting notes (from Zoom), and personal task notes (from OneNote). "
+                      "Consolidate this information and extract ONLY the following:\n\n"
+                      "1. Key Decisions: List any significant decisions explicitly mentioned.\n\n"
+                      "2. Action Items (Seth Benkov): List all action items assigned specifically to Seth Benkov. Include any mentioned due dates.\n\n"
+                      "3. Action Items (Others): List action items assigned to Kevin or Trent that have upcoming due dates (e.g., today, tomorrow, this week). Be specific about who is responsible.\n\n"
+                      "4. Due Dates: List any other major deadlines or due dates mentioned.\n\n"
+                      "Format the output clearly with headings for each section. If no information is found for a section, state 'None identified'. Be concise and focus only on these points.")
+
+    user_message = f"Analyze the following content from yesterday and today:\n\n{text_to_summarize}"
+
     messages = [
-        {"role": "system", "content": "You are a helpful assistant that summarizes text."},
-        {"role": "user", "content": f"Please summarize the following email snippets and meeting notes from yesterday.\n\n{text_to_summarize}"}
+        {"role": "system", "content": system_message},
+        {"role": "user", "content": user_message}
     ]
 
     try:
         response = client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=messages,
-            max_tokens=300,
+            max_tokens=1000, # Increased token limit
             temperature=0.5
         )
         summary = response.choices[0].message.content.strip()
@@ -111,28 +120,30 @@ def main():
     # Note: The first time running may trigger browser-based auth flows
     todays_events = google_calendar_fetcher.get_calendar_events()
     email_list, raw_email_text = gmail_fetcher.get_email_snippets()
-    zoom_summaries, raw_zoom_text = zoom_parser.get_zoom_summaries()
+    # Zoom parser was removed; ensure you handle meeting summaries separately if needed
     onenote_tasks = onenote_parser.get_onenote_tasks_from_export()
 
-    # Combine raw text for AI
+    # Combine raw text for AI, including OneNote tasks
+    # Filter out error messages from OneNote tasks before adding to AI input
+    onenote_text_for_ai = "\n".join([task for task in onenote_tasks if not task.startswith("Error:") and task != "No open tasks found in latest OneNote export."])
     combined_raw_text = f"""--- Emails ---
 {raw_email_text}
 
---- Zoom Meetings ---
-{raw_zoom_text}"""
+--- OneNote Tasks ---
+{onenote_text_for_ai}"""
 
     # --- AI Summarization ---
     ai_summary_result = get_ai_summary(combined_raw_text)
-    print(f"AI Summary Result: {ai_summary_result[:100]}...") # Print start of summary
+    print(f"AI Summary Result: {ai_summary_result[:100]}...")
 
     # --- Compose Email ---
     email_subject = f"Daily Brief - {time.strftime('%A, %B %d, %Y')}" 
     final_html = email_composer.compose_email(
-        calendar_events=todays_events,
-        email_snippets=email_list,
-        zoom_summaries=zoom_summaries,
-        onenote_tasks=onenote_tasks,
+        calendar_events=todays_events, # Now a list of dicts
+        email_list=email_list,       # Now a list of dicts
+        onenote_tasks=onenote_tasks, # Keep as list of strings for its own section
         ai_summary=ai_summary_result
+        # zoom_summaries are now implicitly included in ai_summary input
     )
 
     # --- Save Local Output ---

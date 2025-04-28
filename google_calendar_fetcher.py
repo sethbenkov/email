@@ -62,7 +62,7 @@ def get_calendar_events():
                 summary = event.get('summary', 'No Title')
                 formatted_event = f"{start_time_str} - {summary}"
                 print(f"  - {formatted_event}")
-                formatted_events.append(formatted_event)
+                formatted_events.append({'time': start_time_str, 'name': summary})
             return formatted_events
 
     except HttpError as error:
@@ -83,5 +83,5 @@ if __name__ == '__main__':
     # For local testing
     todays_events = get_calendar_events()
     print("\nFormatted Events:")
-    for item in todays_events:
-        print(item) 
+    for event_dict in todays_events:
+        print(f"{event_dict['time']} - {event_dict['name']}") 
